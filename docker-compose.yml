@@ -2,17 +2,10 @@ services:
   myowntvapp:
     build: .
     container_name: myowntvapp
-    # host networking required so Apple TV can reach the proxy
-    # and pyatv can discover devices via mDNS
-    network_mode: host
+    ports:
+      - "1919:1919"
     volumes:
       - ./data:/app/data
     environment:
-      - PUBLIC_HOST=
+      - PUBLIC_HOST=https://example.com
     restart: unless-stopped
-    # On Mac (Docker Desktop doesn't support network_mode: host):
-    # Comment out network_mode: host and uncomment below:
-    # ports:
-    #   - "1919:1919"
-    # environment:
-    #   - PUBLIC_HOST=YOUR_MAC_IP:1919

@@ -54,7 +54,7 @@ class StreamEvent(BaseModel):
 
 class StreamScraper:
     def __init__(self, logo_service: LogoService):
-        self.base_url = "https://thetvapp.to"
+        self.base_url = "https://thetvapp.mov"
         self.logo_service = logo_service
         self._headers = {
             "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
@@ -62,7 +62,7 @@ class StreamScraper:
 
     async def scrape_category(self, category: str) -> List[StreamEvent]:
         """
-        Scrape a specific sports category from thetvapp.to (e.g. 'nba', 'nhl').
+        Scrape a specific sports category from thetvapp.mov (e.g. 'nba', 'nhl').
         Returns a list of parsed StreamEvents including fetched team logos.
         """
         category_url = f"{self.base_url}/{category.lower().strip()}"

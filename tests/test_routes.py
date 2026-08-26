@@ -128,7 +128,7 @@ def test_sports_category_returns_serialised_events(client: TestClient) -> None:
                 title="Boston Bruins @ New York Rangers",
                 home_team="New York Rangers",
                 away_team="Boston Bruins",
-                url="https://thetvapp.to/event/e1/x",
+                url="https://thetvapp.mov/event/e1/x",
                 category=category,
             )
         ]

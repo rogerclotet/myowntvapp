@@ -6,7 +6,7 @@ A self-hosted web app for watching live sports and TV streams. Built with FastAP
 
 ## Features
 
-- Live sports: NBA, MLB, NHL, NFL, NCAAF, NCAAB, Soccer, PPV
+- Live sports: NBA, MLB, NHL, NFL, NCAAF, NCAAB, Football, PPV
 - Live TV channels
 - HLS stream proxying with playlist rewriting
 - Team logos fetched from TheSportsDB

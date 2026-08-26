@@ -27,7 +27,7 @@ The app displays a dark, card-based UI with team logos and game times. On mobile
 
 1. Clone the repo:
    ```bash
-   git clone https://github.com/Tom-Enns/myowntvapp.git
+   git clone https://github.com/rogerclotet/myowntvapp.git
    cd myowntvapp
    ```
 
@@ -45,7 +45,7 @@ docker run -d \
   --name myowntvapp \
   --network host \
   -v ./data:/app/data \
-  ghcr.io/tom-enns/myowntvapp:latest
+  ghcr.io/rogerclotet/myowntvapp:latest
 ```
 
 > **Note:** `--network host` is required for Apple TV discovery (mDNS) and so the Apple TV can reach the proxy server. If you don't need AirPlay casting, you can use `-p 1919:1919` instead.
@@ -53,7 +53,7 @@ docker run -d \
 ### Option 3: Pull from GitHub Container Registry
 
 ```bash
-docker pull ghcr.io/tom-enns/myowntvapp:latest
+docker pull ghcr.io/rogerclotet/myowntvapp:latest
 ```
 
 ### Supported Architectures
@@ -80,7 +80,7 @@ Published images are multi-arch manifests; `docker pull` picks the right one aut
 | Field | Value |
 |-------|-------|
 | **Name** | `myowntvapp` |
-| **Repository** | `ghcr.io/tom-enns/myowntvapp:latest` |
+| **Repository** | `ghcr.io/rogerclotet/myowntvapp:latest` |
 | **Network Type** | `host` |
 | **WebUI** | `http://[IP]:[PORT:1919]` |
 
@@ -103,7 +103,7 @@ If you have the **Compose Manager** plugin installed:
 ```yaml
 services:
   myowntvapp:
-    image: ghcr.io/tom-enns/myowntvapp:latest
+    image: ghcr.io/rogerclotet/myowntvapp:latest
     container_name: myowntvapp
     network_mode: host
     volumes:

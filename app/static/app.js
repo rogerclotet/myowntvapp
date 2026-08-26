@@ -42,8 +42,8 @@ document.addEventListener('DOMContentLoaded', () => {
         panel.classList.toggle('hidden');
     });
 
-    // Load default
-    loadCategory('nba');
+    // Load default (matches the initially active tab)
+    loadCategory('soccer');
 });
 
 async function loadCategory(category) {

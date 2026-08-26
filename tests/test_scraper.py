@@ -73,7 +73,7 @@ async def test_at_separator_maps_away_then_home(scraper: StreamScraper) -> None:
     event = await scraper._parse_and_enrich_event(
         event_id="e1",
         title="Boston Bruins @ New York Rangers",
-        url="https://thetvapp.to/event/e1/x",
+        url="https://thetvapp.mov/event/e1/x",
         category="nhl",
     )
 
@@ -85,7 +85,7 @@ async def test_vs_separator_maps_home_then_away(scraper: StreamScraper) -> None:
     event = await scraper._parse_and_enrich_event(
         event_id="e2",
         title="Real Madrid vs Barcelona",
-        url="https://thetvapp.to/event/e2/x",
+        url="https://thetvapp.mov/event/e2/x",
         category="soccer",
     )
 
@@ -97,7 +97,7 @@ async def test_title_gains_the_formatted_event_time(scraper: StreamScraper) -> N
     event = await scraper._parse_and_enrich_event(
         event_id="e3",
         title="Boston Bruins @ New York Rangers\n    2026-01-14T00:10:00Z",
-        url="https://thetvapp.to/event/e3/x",
+        url="https://thetvapp.mov/event/e3/x",
         category="nhl",
     )
 
@@ -108,7 +108,7 @@ async def test_unparseable_second_line_leaves_the_title_alone(scraper: StreamScr
     event = await scraper._parse_and_enrich_event(
         event_id="e4",
         title="Boston Bruins @ New York Rangers\n    Starting soon",
-        url="https://thetvapp.to/event/e4/x",
+        url="https://thetvapp.mov/event/e4/x",
         category="nhl",
     )
 
@@ -121,7 +121,7 @@ async def test_logos_are_attached_for_parsed_matchups(
     event = await scraper._parse_and_enrich_event(
         event_id="e5",
         title="Boston Bruins @ New York Rangers",
-        url="https://thetvapp.to/event/e5/x",
+        url="https://thetvapp.mov/event/e5/x",
         category="nhl",
     )
 
@@ -136,7 +136,7 @@ async def test_titles_without_a_matchup_skip_logo_lookup(
     event = await scraper._parse_and_enrich_event(
         event_id="tv1",
         title="ESPN",
-        url="https://thetvapp.to/tv/espn/x",
+        url="https://thetvapp.mov/tv/espn/x",
         category="tv",
     )
 

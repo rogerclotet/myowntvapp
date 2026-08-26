@@ -105,9 +105,12 @@ services:
   myowntvapp:
     image: ghcr.io/rogerclotet/myowntvapp:latest
     container_name: myowntvapp
-    network_mode: host
+    ports:
+      - "1919:1919"
     volumes:
       - /mnt/user/appdata/myowntvapp:/app/data
+    environment:
+      - PUBLIC_HOST=https://example.com
     restart: unless-stopped
 ```
 

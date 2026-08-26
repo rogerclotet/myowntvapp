@@ -56,6 +56,29 @@ docker run -d \
 docker pull ghcr.io/rogerclotet/myowntvapp:latest
 ```
 
+### Option 4: Route Outbound Traffic Through gluetun (VPN)
+
+If you want the app's outbound connections (stream scraping/proxying) to go through a
+VPN — e.g. to avoid geo-blocked sources or hide the traffic from your ISP — use
+[`docker-compose.gluetun.yml`](docker-compose.gluetun.yml), which runs
+[gluetun](https://github.com/qdm12/gluetun) alongside the app and attaches the app to
+gluetun's network stack (`network_mode: "service:gluetun"`), so every outbound
+connection it makes exits through the VPN tunnel.
+
+1. Fill in the `gluetun` service's environment variables for your VPN provider (see the
+   [gluetun wiki](https://github.com/qdm12/gluetun-wiki) for provider-specific settings —
+   the example uses WireGuard, but OpenVPN and most major providers are supported).
+2. Start the stack:
+   ```bash
+   docker compose -f docker-compose.gluetun.yml up -d
+   ```
+3. Open `http://<your-server-ip>:1919` as usual — the port is published on the
+   `gluetun` service since `myowntvapp` no longer has its own network stack.
+
+> **Note:** because the app shares gluetun's network namespace, it loses direct LAN
+> access — AirPlay discovery (mDNS) to your Apple TV won't work in this mode. Use this
+> only if you don't need AirPlay casting, or don't need the VPN.
+
 ### Supported Architectures
 
 Published images are multi-arch manifests; `docker pull` picks the right one automatically.

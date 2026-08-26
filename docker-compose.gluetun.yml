@@ -1,0 +1,31 @@
+services:
+  gluetun:
+    image: qmcgaw/gluetun
+    container_name: gluetun
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    ports:
+      - "1919:1919"
+    volumes:
+      - ./gluetun:/gluetun
+    environment:
+      - VPN_SERVICE_PROVIDER=changeme
+      - VPN_TYPE=wireguard
+      - WIREGUARD_PRIVATE_KEY=changeme
+      - WIREGUARD_ADDRESSES=changeme
+      - SERVER_COUNTRIES=changeme
+    restart: unless-stopped
+
+  myowntvapp:
+    build: .
+    container_name: myowntvapp
+    network_mode: "service:gluetun"
+    depends_on:
+      - gluetun
+    volumes:
+      - ./data:/app/data
+    environment:
+      - PUBLIC_HOST=https://example.com
+    restart: unless-stopped

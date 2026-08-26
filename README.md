@@ -56,6 +56,17 @@ docker run -d \
 docker pull ghcr.io/tom-enns/myowntvapp:latest
 ```
 
+### Supported Architectures
+
+Published images are multi-arch manifests; `docker pull` picks the right one automatically.
+
+| Architecture | Platform | Typical hosts |
+|---|---|---|
+| `linux/amd64` | x86-64 | Unraid, most NAS boxes, generic servers |
+| `linux/arm64` | ARM 64-bit (aarch64) | Apple Silicon Macs, Raspberry Pi 4/5 (64-bit OS), ARM cloud VMs |
+
+32-bit ARM (`armv7`/`armhf`) is not built — several dependencies have no 32-bit wheels.
+
 ---
 
 ## Unraid Installation
@@ -121,14 +132,41 @@ services:
 
 ### Local Setup
 
+Dependencies are managed with [uv](https://docs.astral.sh/uv/). Install it once
+(`brew install uv`, or `curl -LsSf https://astral.sh/uv/install.sh | sh`), then:
+
 ```bash
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-uvicorn app.main:app --host 0.0.0.0 --port 1919
+uv sync                 # creates .venv from uv.lock, exact pinned versions
+uv run uvicorn app.main:app --host 0.0.0.0 --port 1919
 ```
 
-Requires `ffmpeg` installed locally (`brew install ffmpeg` on macOS).
+`uv sync` provisions Python 3.12 itself if you don't have it, so there's no
+`python3 -m venv` / `pip install` step. Requires `ffmpeg` installed locally
+(`brew install ffmpeg` on macOS).
+
+### Managing Dependencies
+
+```bash
+uv add <package>            # add a runtime dependency (updates uv.lock)
+uv add --dev <package>      # add a dev/test-only dependency
+uv remove <package>
+uv lock --upgrade           # re-resolve everything to the newest allowed versions
+uv sync --all-groups        # install runtime + dev dependencies
+```
+
+`uv.lock` is committed and is the source of truth. Both the Docker build and CI
+install with `--frozen`, so they fail loudly if the lockfile drifts from
+`pyproject.toml` rather than silently resolving something different.
+
+### Tests
+
+```bash
+uv run pytest
+```
+
+The suite is offline and hermetic — no live server, no network, no Apple TV
+required. It covers HLS playlist rewriting, event/date parsing, host resolution,
+and the HTTP routes (with the scraper and extractor stubbed out).
 
 ### Build Docker Image Locally
 
@@ -136,6 +174,24 @@ Requires `ffmpeg` installed locally (`brew install ffmpeg` on macOS).
 docker build -t myowntvapp .
 docker run --network host -v ./data:/app/data myowntvapp
 ```
+
+Build for a specific architecture, or both at once:
+
+```bash
+# Single architecture (loadable into the local Docker daemon)
+docker build --platform linux/arm64 -t myowntvapp:arm64 .
+
+# Both architectures in one manifest — requires a registry to push to,
+# plus QEMU (`docker run --privileged --rm tonistiigi/binfmt --install all`)
+# when building for an architecture other than your own.
+docker buildx build --platform linux/amd64,linux/arm64 \
+  -t ghcr.io/<you>/myowntvapp:dev --push .
+```
+
+> **Note:** `pyatv` depends on `miniaudio`, which ships no prebuilt aarch64 wheel. The Dockerfile
+> compiles it from source in a separate builder stage (via `uv sync --frozen --no-dev`), so the
+> final ARM64 image carries neither a compiler nor uv itself. Expect the first ARM64 build to
+> take a couple of minutes longer than AMD64.
 
 ---
 
@@ -145,7 +201,8 @@ docker run --network host -v ./data:/app/data myowntvapp
 - **Frontend:** Vanilla JS, HLS.js (Chrome/Firefox), native HLS (Safari/iOS)
 - **Streaming:** ffmpeg for HLS remuxing, m3u8 playlist rewriting
 - **Casting:** pyatv for AirPlay protocol
-- **Container:** Python 3.12 slim + ffmpeg
+- **Container:** Python 3.12 slim + ffmpeg, multi-arch (`linux/amd64`, `linux/arm64`)
+- **Dependencies:** uv (`pyproject.toml` + committed `uv.lock`)
 
 ---
 

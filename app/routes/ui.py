@@ -10,7 +10,7 @@ templates = Jinja2Templates(directory=os.path.join(os.path.dirname(os.path.dirna
 
 @router.get("/", response_class=HTMLResponse)
 async def index(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse(request, "index.html")
 
 
 @router.get("/watch/{session_id}", response_class=HTMLResponse)

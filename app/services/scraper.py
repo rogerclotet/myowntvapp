@@ -1,5 +1,8 @@
 import logging
 import asyncio
+import datetime
+import zoneinfo
+
 import aiohttp
 from bs4 import BeautifulSoup
 from pydantic import BaseModel
@@ -8,6 +11,36 @@ from typing import List, Optional
 from app.services.logos import LogoService
 
 logger = logging.getLogger(__name__)
+
+EVENT_TIMEZONE = zoneinfo.ZoneInfo("America/New_York")
+
+
+def _day_ordinal_suffix(day: int) -> str:
+    # 11th/12th/13th break the "1 -> st, 2 -> nd, 3 -> rd" pattern.
+    if 11 <= day <= 13:
+        return "th"
+    return {1: "st", 2: "nd", 3: "rd"}.get(day % 10, "th")
+
+
+def format_event_time(dt_str: str) -> str | None:
+    """Render a UTC timestamp as US Eastern wall time, or None if unparseable.
+
+    Upstream listings carry times as ISO-8601 with a trailing 'Z'; anything
+    else is a title fragment we should leave alone.
+    """
+    dt_str = dt_str.strip()
+    if not dt_str.endswith("Z"):
+        return None
+
+    try:
+        parsed = datetime.datetime.fromisoformat(dt_str.replace("Z", "+00:00"))
+    except ValueError:
+        logger.warning(f"Unparseable event timestamp: {dt_str!r}")
+        return None
+
+    eastern = parsed.astimezone(EVENT_TIMEZONE)
+    suffix = _day_ordinal_suffix(eastern.day)
+    return eastern.strftime(f"%a %B %-d{suffix} %-I:%M %p %Z")
 
 class StreamEvent(BaseModel):
     id: str
@@ -95,18 +128,9 @@ class StreamScraper:
 
         nice_time = ""
         if len(lines) > 1:
-            dt_str = lines[1].strip()
-            if dt_str.endswith('Z'):
-                try:
-                    import datetime
-                    import zoneinfo
-                    dt = datetime.datetime.fromisoformat(dt_str.replace('Z', '+00:00'))
-                    dt_est = dt.astimezone(zoneinfo.ZoneInfo("America/New_York"))
-                    def get_suffix(d):
-                        return 'th' if 11 <= d <= 13 else {1: 'st', 2: 'nd', 3: 'rd'}.get(d % 10, 'th')
-                    nice_time = dt_est.strftime(f"\n%a %B %-d{get_suffix(dt_est.day)} %-I:%M %p EST")
-                except Exception:
-                    pass
+            formatted = format_event_time(lines[1])
+            if formatted:
+                nice_time = f"\n{formatted}"
 
         final_title = clean_title + nice_time
 
